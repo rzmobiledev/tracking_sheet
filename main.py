@@ -46,22 +46,26 @@ def send_exercise_data(q: str, g: str, w_kg: float, h_cm: float, a: int):
     response = requests.post(url=API_ENDPOINT, json=params, headers=headers)
     response.raise_for_status()
     data = response.json()["exercises"]
-    for exercise in  data:
+    for exercise in data:
         save_workout(
-            name=exercise['name'],
-            duration_min=float(exercise['duration_min']),
-            calories=float(exercise['nf_calories'])
+            name=exercise["name"],
+            duration_min=float(exercise["duration_min"]),
+            calories=float(exercise["nf_calories"]),
         )
     return response.status_code
 
+
 def save_workout(name: str, duration_min: float, calories: float):
+    """
+    Save workout information to google sheet
+    """
     params = {
         "email": {
-                "date": DATE.strftime("%Y/%m/%d"),
-                "time": DATE.strftime("%H:%M:%S"),
-                "exercise": name.title(),
-                "duration": duration_min,
-                "calories": calories,
+            "date": DATE.strftime("%Y/%m/%d"),
+            "time": DATE.strftime("%H:%M:%S"),
+            "exercise": name.title(),
+            "duration": duration_min,
+            "calories": calories,
         }
     }
 
@@ -74,8 +78,19 @@ def save_workout(name: str, duration_min: float, calories: float):
     return response.status_code
 
 
-send_exercise_data(
-    q=input("Tell me which exercise you did?: "), g="male", w_kg=80.2, h_cm=170, a=39
-)
+def retrieve_exercise_informations():
+    headers = {"Authorization": f"Bearer {SHEETY_TOKEN}"}
 
+    response = requests.get(url=SHEETY_ENDPOINT, headers=headers)
+    records = response.json()
+    for record in records['email']:
+        print(record)
+
+
+# lets run the program
+# send_exercise_data(
+#     q=input("Tell me which exercise you did?: "), g="male", w_kg=80.2, h_cm=170, a=39
+# )
 # Ran 5K and cycled for 30 minutes.
+
+retrieve_exercise_informations()
